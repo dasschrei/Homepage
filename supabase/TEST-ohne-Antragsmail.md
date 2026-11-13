@@ -47,5 +47,5 @@ Bitte zusätzlich einmal **ohne** Karte buchen und die Seite schließen. In Zenc
 
 ## Ergebnis (13.11.2026, Echttest)
 
-**Gescheitert.** Mit `waiting_customer` öffnet sich keine Kreditkartenseite, nur die Warteseite. Zenchef erzeugt bei diesem Status keinen Kartenlink. Secret `WEB_RES_ANLEGE_STATUS` wurde wieder entfernt, damit wieder `confirmed` angelegt wird.
+**Gescheitert.** Mit `waiting_customer` öffnet sich keine Kreditkartenseite, nur die Warteseite. Zenchef erzeugt bei diesem Status keinen Kartenlink. Secret `WEB_RES_ANLEGE_STATUS` in Supabase löschen, damit wieder `confirmed` angelegt wird. Die Testbuchung (Status „Warten auf Kunde“) in Zenchef stornieren.
 Stattdessen steht jetzt auf der Reservierungsseite (DE + EN) vor „Weiter zur Kreditkarte“ ein Hinweis, dass Zenchef zusätzlich eine Mail mit demselben Link schickt. Die Anfrage an den Zenchef-Support bleibt offen.
