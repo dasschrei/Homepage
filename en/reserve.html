@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Book a table – Das Schrei</title>
+<meta name="description" content="Book a table at Das Schrei – dining room or chef’s table, live availability.">
+<link rel="stylesheet" href="../assets/fonts/fonts.css?v=20261011">
+<link rel="icon" href="../assets/favicon-48.png" sizes="48x48" type="image/png">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="canonical" href="https://www.das-schrei.at/en/reserve.html">
+<link rel="alternate" hreflang="de" href="https://www.das-schrei.at/reservieren.html">
+<link rel="alternate" hreflang="en" href="https://www.das-schrei.at/en/reserve.html">
+<style>
+/* Layout: eine schmale Spalte im Homepage-Look, Schritte klappen nach der Wahl zu einer Zeile zusammen */
+:root{
+  --ink:#151512; --ink-2:#1e1e1a; --cream:#f4f1ea; --sand:#d7d0c2; --stone:#6e6e6e;
+  --line:rgba(21,21,18,.16); --soft:rgba(21,21,18,.05); --warn:#8a5a2b;
+  --display:"Italiana","Didot",serif; --body:"DM Sans",system-ui,sans-serif; --mark:"Roboto","DM Sans",sans-serif;
+  --ease:cubic-bezier(.76,0,.24,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--cream);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:1px solid currentColor;outline-offset:4px}
+.wrap{max-width:640px;margin:0 auto;padding-block:28px 80px}
+.top{display:flex;justify-content:space-between;align-items:center;padding-block:4px 40px}
+.wordmark{font-family:var(--mark);font-size:22px;letter-spacing:.04em}
+.lang{font-size:12px;font-weight:700;letter-spacing:.22em}
+.draft{font-size:13px;border:1px dashed var(--warn);color:var(--warn);padding:10px 14px;border-radius:10px;margin-bottom:32px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--stone);margin:0 0 20px;display:flex;align-items:center;gap:14px}
+.eyebrow::before{content:"";width:28px;height:1px;background:currentColor}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(46px,9vw,84px);line-height:1.02;letter-spacing:-.01em;margin:0 0 14px;text-wrap:balance}
+.intro{opacity:.82;max-width:46ch;margin:0 0 40px}
+
+.step{border-top:1px solid var(--line);padding-block:22px}
+.step:last-of-type{border-bottom:1px solid var(--line)}
+.step__head{display:flex;align-items:baseline;gap:14px;width:100%;text-align:left}
+.step__n{font-size:12px;font-weight:700;letter-spacing:.22em;color:var(--stone);min-width:2ch;font-variant-numeric:tabular-nums}
+.step__t{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase}
+.step__v{margin-left:auto;font-family:var(--display);font-size:24px;line-height:1.1;text-align:right}
+.step__edit{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-left:10px;border-bottom:1px solid var(--line)}
+.step.locked{opacity:.35}
+.step__body{padding-top:22px}
+
+/* Kalender */
+.cal__nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.cal__m{font-family:var(--display);font-size:28px}
+.cal__btn{width:40px;height:40px;border:1px solid var(--line);border-radius:50%;font-size:16px}
+.cal__btn:disabled{opacity:.25;cursor:default}
+.cal__grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal__dow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);text-align:center;padding-bottom:6px}
+.day{aspect-ratio:1;max-width:100%;border-radius:50%;font-variant-numeric:tabular-nums;font-size:15px;display:grid;place-items:center;position:relative;transition:background .3s var(--ease),color .3s var(--ease)}
+.day:not(:disabled):hover{background:var(--soft)}
+.day:disabled{color:rgba(21,21,18,.25);cursor:default;text-decoration:line-through;text-decoration-color:rgba(21,21,18,.18)}
+.day.sel{background:var(--ink);color:var(--cream)}
+.day.special::after{content:"";position:absolute;bottom:14%;width:4px;height:4px;border-radius:50%;background:currentColor}
+.cal__legend{font-size:13px;color:var(--stone);margin-top:14px;display:flex;gap:18px;flex-wrap:wrap}
+.dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--ink);vertical-align:middle;margin-right:6px}
+
+/* Personen */
+.pax{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.chip{height:56px;border:1px solid var(--line);border-radius:999px;font-size:15px;font-variant-numeric:tabular-nums;transition:background .3s var(--ease),color .3s var(--ease),border-color .3s}
+.chip:not(:disabled):hover{border-color:var(--ink)}
+.chip.sel{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.chip:disabled{opacity:.3;cursor:default;text-decoration:line-through}
+.hint{font-size:13px;color:var(--stone);margin:14px 0 0}
+
+/* Räume */
+.rooms{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.rooms{grid-template-columns:1fr}}
+.room{text-align:left;border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:8px;min-width:0;transition:background .3s var(--ease),color .3s var(--ease),border-color .3s}
+.room:not(:disabled):hover{border-color:var(--ink)}
+.room.sel{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.room:disabled{opacity:.4;cursor:default}
+.room__k{font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;opacity:.6}
+.room__t{font-family:var(--display);font-size:30px;line-height:1.05}
+.room__d{font-size:14px;opacity:.82}
+.room__s{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-top:6px}
+
+/* Zeiten */
+.times{display:flex;flex-wrap:wrap;gap:8px}
+.times .chip{padding:0 26px;flex:0 0 auto}
+
+/* Formular */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.form{grid-template-columns:1fr}}
+.f{display:flex;flex-direction:column;gap:6px;min-width:0}
+.f.full{grid-column:1/-1}
+.f label{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone)}
+.f input,.f textarea{font:inherit;color:inherit;background:transparent;border:0;border-bottom:1px solid var(--line);padding:8px 0;border-radius:0;width:100%}
+.f textarea{resize:vertical;min-height:70px}
+.f input:focus,.f textarea:focus{outline:none;border-bottom-color:var(--ink)}
+.f input:invalid.touched{border-bottom-color:var(--warn)}
+.check{grid-column:1/-1;display:flex;gap:12px;align-items:flex-start;font-size:14px;opacity:.9}
+.check input{margin-top:4px;accent-color:var(--ink);width:16px;height:16px;flex:0 0 auto}
+.err{grid-column:1/-1;color:var(--warn);font-size:14px;margin:0}
+
+.btn{position:relative;display:inline-flex;align-items:center;gap:14px;height:56px;padding:0 30px;border-radius:999px;border:1px solid var(--ink);color:var(--ink);font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;overflow:hidden;isolation:isolate;margin-top:24px}
+.btn::before{content:"";position:absolute;inset:0;background:var(--ink);transform:translateY(101%);border-radius:inherit;transition:transform .5s var(--ease);z-index:-1}
+.btn span{transition:color .5s var(--ease)}
+.btn:hover::before{transform:translateY(0)}
+.btn:hover span{color:var(--cream)}
+.arrow{width:18px;height:1px;background:currentColor;position:relative;transition:background .5s}
+.arrow::after{content:"";position:absolute;right:0;top:-3px;width:7px;height:7px;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:rotate(45deg)}
+.btn:hover .arrow{background:var(--cream);color:var(--cream)}
+
+.done{text-align:left}
+.done h2{font-family:var(--display);font-weight:400;font-size:clamp(40px,8vw,64px);line-height:1.04;margin:0 0 18px}
+.sum{border-top:1px solid var(--line);margin:24px 0}
+.sum div{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding-block:12px;font-size:15px}
+.sum dt{color:var(--stone);font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin:0}
+.sum dd{margin:0;text-align:right}
+.mails{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.mails li{border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:15px}
+.mails b{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:2px}
+.cardbox{border:1px dashed var(--line);border-radius:14px;padding:18px;font-size:14px;opacity:.9}
+.cardbox b{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:4px}
+.foot{font-size:13px;color:var(--stone);margin-top:40px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+body{margin:0}
+.loading{font-size:13px;color:var(--stone);margin:10px 0 0}
+.busy{opacity:.55;pointer-events:none}
+.spinner{display:inline-block;width:14px;height:14px;border:1px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.testpanel{margin-top:48px;border:1px dashed var(--warn);border-radius:12px;padding:14px;font-size:13px}
+.testpanel b{color:var(--warn);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.testpanel pre{white-space:pre-wrap;word-break:break-word;max-height:320px;overflow:auto;background:var(--soft);padding:10px;border-radius:8px;font-size:12px;margin:8px 0 0}
+.testpanel .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tbtn{border:1px solid var(--warn);color:var(--warn);border-radius:999px;padding:6px 12px;font-size:12px}
+.chip.keine{height:auto;min-height:44px;padding:10px 20px;line-height:1.35;border-radius:24px;align-self:flex-start;font-size:14px;margin:4px 0 6px;text-align:left}
+.kframe{border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:20px 0 8px;background:#fff}
+.kframe iframe{display:block;width:100%;height:760px;border:0}
+.room{padding:0 0 20px;overflow:hidden}
+.room > span{padding-inline:20px}
+.room__img{display:block;margin-bottom:12px}
+.room__img img{display:block;width:100%;max-width:100%;aspect-ratio:4/3;object-fit:cover;transition:transform .8s var(--ease),filter .5s}
+.room:not(:disabled):hover .room__img img{transform:scale(1.03)}
+.room:disabled .room__img img{filter:grayscale(1)}
+.chip.wl{display:inline-flex;flex-direction:column;justify-content:center;line-height:1.1;border-style:dashed}
+.chip.wl small{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin-top:3px}
+.room__img{position:relative}
+.room__badge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;background:var(--cream);color:var(--ink);padding:10px 18px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap}
+.room.wlroom:not(.sel){color:var(--stone);border-style:dashed}
+.room.wlroom .room__img img{filter:grayscale(1) brightness(.85)}
+.telrow{display:flex;gap:10px;align-items:stretch;min-width:0}
+.vwbox{position:relative;display:flex;align-items:center;flex:0 0 auto;border-bottom:1px solid var(--line);padding:8px 2px;white-space:nowrap}
+.vwbox:focus-within{border-bottom-color:var(--ink)}
+.vwbox select{position:absolute;inset:0;width:100%;opacity:0;cursor:pointer;font-size:16px}
+.telrow select.alt{font:inherit;color:inherit;background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 2px;flex:0 0 auto;cursor:pointer}
+.telrow select:focus{outline:none;border-bottom-color:var(--ink)}
+.telrow input{flex:1;min-width:0}
+.evcard{width:100%;margin-bottom:10px}
+.evcard[aria-disabled="true"]{cursor:default}
+.room > span.room__img{padding-inline:0}
+.evcard.evsel{border-color:var(--ink)}
+.day.evday{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.day.evday small{font-size:8px;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.day.evday:not(.sel){box-shadow:inset 0 0 0 1px var(--ink)}
+.evcard:not(:has(.room__img)){padding-top:20px}
+.evcard .room__d{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.linkout{word-break:break-all;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a class="wordmark" href="index.html" style="color:inherit;text-decoration:none">SCHREI</a><span style="display:flex;gap:14px;align-items:center"><span class="lang" id="umg"></span><a class="lang" href="../reservieren.html" hreflang="de" style="color:inherit">DE</a></span></div>
+  <div class="draft" id="testhinweis" hidden>Testumgebung: Es wird im Zenchef-Demo-Restaurant gebucht, nicht im Schrei.</div>
+
+  <p class="eyebrow">Reservations</p>
+  <h1>Your evening at Das Schrei.</h1>
+  <p class="intro">Choose a date, the number of guests and a room. Then you will see the available times.</p>
+
+  <div id="app"></div>
+
+  <p class="foot">More than 8 guests, an exclusive booking or questions? Write to restaurant@das-schrei.at or call +43 664 1541102.</p>
+
+  <div class="testpanel" id="tp" hidden>
+    <b>Testpanel</b>
+    <div class="row">
+      <button class="tbtn" id="t-info">Verbindung prüfen</button>
+      <button class="tbtn" id="t-diag">Rohdaten zum gewählten Tag</button>
+      <button class="tbtn" id="t-force" hidden>Bestätigung erzwingen</button>
+      <button class="tbtn" id="t-auf">Aufräumen (Probelauf)</button>
+      <button class="tbtn" id="t-clear">Neu starten</button>
+    </div>
+    <pre id="tlog">Noch keine Antwort.</pre>
+  </div>
+</div>
+
+<script>
+(function(){
+  const BASE = '../';
+  const LANG = document.documentElement.lang === 'en' ? 'en' : 'de';
+  const CFG = {
+    FN: 'https://bkzcvyvztjpmlbwnvnct.supabase.co/functions/v1/web-reservierung',
+    KEY: 'sb_publishable_gcHRftA2YDkCDHTNJMvI3g_tbpjDEls',
+    SEITE: location.pathname.split('/').pop() || 'reservieren.html'
+  };
+  const app = document.getElementById('app');
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const WD = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  // Ländernamen kommen aus dem Browser (Intl) – in der Sprache der Seite. Oben die häufigsten, darunter alle alphabetisch.
+  const LAENDER = [['at','+43'],['de','+49'],['ch','+41'],['it','+39'],['li','+423'],['eg','+20'],['al','+355'],['dz','+213'],['ar','+54'],['am','+374'],['az','+994'],['au','+61'],['bh','+973'],['bd','+880'],['by','+375'],['be','+32'],['ba','+387'],['br','+55'],['bg','+359'],['cl','+56'],['cn','+86'],['cr','+506'],['do','+1'],['dk','+45'],['ee','+372'],['fi','+358'],['fr','+33'],['ge','+995'],['gr','+30'],['gb','+44'],['hk','+852'],['in','+91'],['id','+62'],['iq','+964'],['ir','+98'],['ie','+353'],['is','+354'],['il','+972'],['jp','+81'],['jo','+962'],['kh','+855'],['ca','+1'],['kz','+7'],['qa','+974'],['ke','+254'],['co','+57'],['xk','+383'],['hr','+385'],['kw','+965'],['lv','+371'],['lb','+961'],['lt','+370'],['lu','+352'],['mo','+853'],['my','+60'],['mv','+960'],['mt','+356'],['ma','+212'],['mu','+230'],['mx','+52'],['md','+373'],['mc','+377'],['mn','+976'],['me','+382'],['np','+977'],['nz','+64'],['nl','+31'],['ng','+234'],['mk','+389'],['no','+47'],['om','+968'],['pk','+92'],['pe','+51'],['ph','+63'],['pl','+48'],['pt','+351'],['ro','+40'],['ru','+7'],['sm','+378'],['sa','+966'],['se','+46'],['rs','+381'],['sg','+65'],['sk','+421'],['si','+386'],['es','+34'],['lk','+94'],['za','+27'],['kr','+82'],['tw','+886'],['th','+66'],['cz','+420'],['tn','+216'],['tr','+90'],['us','+1'],['ua','+380'],['hu','+36'],['uy','+598'],['uz','+998'],['ve','+58'],['ae','+971'],['vn','+84'],['cy','+357']];
+  let landName = c => c.toUpperCase();
+  try { const dn = new Intl.DisplayNames([LANG], { type: 'region' }); landName = c => dn.of(c.toUpperCase()) || c.toUpperCase(); } catch(e) {}
+  const VORWAHLEN_OBEN = LAENDER.slice(0,5).map(([c,v]) => [c, landName(c), v]);
+  const VORWAHLEN_ALLE = LAENDER.slice(5).map(([c,v]) => [c, landName(c), v]).sort((x,y) => x[1].localeCompare(y[1], LANG));
+  const flagge = c => String.fromCodePoint(...[...c.toUpperCase()].map(x => 0x1F1E6 + x.charCodeAt(0) - 65));
+
+  const ROOMS = {
+    gastraum:{img:'gastraum-raum', alt:'The dining room with brick wall, wine rack and laid tables', name:'Dining room', kicker:'Restaurant', desc:'You choose 4 to 7 courses. Tables for 1 to 8 guests.', times:['18:00','18:30','19:30']},
+    chefs:{img:'chefs-table-theke', alt:'The laid counter of the chef’s table in front of the open kitchen', name:'Chef’s Table', kicker:'At the open kitchen', desc:'7 courses, all guests start together. 10 seats at the counter.', times:['19:00']}
+  };
+  const today = new Date(); today.setHours(0,0,0,0);
+  const maxDate = new Date(today); maxDate.setDate(maxDate.getDate()+120);
+  const S = { view:new Date(today.getFullYear(), today.getMonth(), 1), date:null, pax:null, room:null, time:null, open:'date',
+    offen:{}, monatGeladen:{}, frei:null, freiKey:'', phase:'form', err:'', busy:false, start:Date.now(), testAlle:false };
+  let TEST = false;
+
+  const iso = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const fromIso = s => { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
+  const nice = s => { const d=fromIso(s); return WD[d.getDay()]+', '+d.getDate()+' '+MONTHS[d.getMonth()]; };
+  const short = s => { const d=fromIso(s); return DOW[(d.getDay()+6)%7]+' '+d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3); };
+  const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const store = { get(){ try{ return JSON.parse(sessionStorage.getItem('schrei_res')||'null'); }catch(e){ return null; } },
+                  set(v){ try{ v ? sessionStorage.setItem('schrei_res', JSON.stringify(v)) : sessionStorage.removeItem('schrei_res'); }catch(e){} } };
+
+  // Das Ergebnis von „anlegen“ bleibt stehen (auch nach der Kartenseite), alles andere steht darunter
+  function log(titel, x){
+    if (!TEST) return;
+    const txt = titel + '\n' + JSON.stringify(x, null, 2);
+    if (/^anlegen/.test(titel)) { try { sessionStorage.setItem('schrei_anlegen_log', txt); } catch(e){} }
+    let fest = ''; try { fest = sessionStorage.getItem('schrei_anlegen_log') || ''; } catch(e){}
+    document.getElementById('tlog').textContent = (fest && !/^anlegen/.test(titel) ? '── Anlegen ──\n' + fest + '\n\n── Zuletzt ──\n' : '') + txt;
+  }
+  async function api(action, data){
+    const r = await fetch(CFG.FN, { method:'POST', headers:{ 'Content-Type':'application/json', apikey: CFG.KEY }, body: JSON.stringify(Object.assign({ action }, data||{})) });
+    const j = await r.json().catch(()=>({ error:'No valid response ('+r.status+')' }));
+    log(action + ' → ' + r.status, j);
+    if (!r.ok || j.error) throw new Error(j.error || ('Error '+r.status));
+    if (j.umgebung) setUmg(j.umgebung, j.debug);
+    return j;
+  }
+  function setUmg(u, debug){
+    TEST = !!debug;                       // Testpanel und „Link zeigen statt weiterleiten“
+    const live = u === 'live';
+    const h = document.getElementById('testhinweis');
+    h.hidden = !TEST;
+    h.textContent = live ? 'LIVE-TEST: Es wird im echten Zenchef vom Schrei gebucht. Nach dem Test bitte stornieren.' : 'Testumgebung: Es wird im Zenchef-Demo-Restaurant gebucht, nicht im Schrei.';
+    document.getElementById('tp').hidden = !TEST;
+    document.getElementById('t-force').style.display = live ? 'none' : '';
+    document.getElementById('umg').textContent = TEST ? (live ? 'LIVE-TEST' : 'TEST') : '';
+  }
+
+  // ------------------------------------------------ Daten laden
+  async function ladeMonat(){
+    const v = S.view, key = v.getFullYear()+'-'+v.getMonth();
+    if (S.monatGeladen[key]) return;
+    S.monatGeladen[key] = 'laedt'; render();
+    const von = new Date(Math.max(v, today)), bis = new Date(v.getFullYear(), v.getMonth()+1, 0);
+    try { const j = await api('monat', { von: iso(von), bis: iso(bis > maxDate ? maxDate : bis) }); j.offen.forEach(d => S.offen[d] = true); Object.assign(S.evTage = S.evTage || {}, j.events || {}); S.monatGeladen[key] = 'ok'; }
+    catch(e){ S.monatGeladen[key] = null; S.err = 'The available days could not be loaded. ' + e.message; }
+    render();
+  }
+  async function ladeFrei(){
+    const key = S.date+'|'+S.pax; if (S.freiKey === key && S.frei) return;
+    S.frei = null; S.freiKey = key; render();
+    try { const j = await api('frei', { datum:S.date, pax:S.pax }); if (S.freiKey !== key) return; S.frei = j.raeume; S.events = j.events || []; S.wl = j.warteliste || {chefs:[], gastraum:[]}; S.testAlle = !!j.testAlleZeiten; }
+    catch(e){ S.err = 'The available times could not be loaded. ' + e.message; S.frei = {chefs:[], gastraum:[]}; }
+    render();
+  }
+  const wlZeiten = key => (S.wl && S.wl[key]) || [];
+  const evListe = () => S.events || [];
+  const evAktiv = () => evListe().find(e=>e.id===S.evId) || (evListe().length===1 ? evListe()[0] : null);
+  function roomState(key){
+    if (!S.frei) return {ok:false, label:'Loading …'};
+    if (evListe().length){
+      const ev = evAktiv(); if (!ev) return {ok:false, label:'Choose the event first'};
+      if (ev.vorauszahlung) return {ok:false, label:'Bookable by phone only'};
+      const t = ev.raeume[key] || [];
+      return t.length ? {ok:true, label:'Event · '+t.join(' · ')} : {ok:false, label:'Fully booked'};
+    }
+    const t = S.frei[key] || [];
+    if (!t.length && wlZeiten(key).length) return {ok:true, wl:true, label:'Fully booked · waiting list'};
+    if (!t.length) return {ok:false, label: key==='gastraum' && S.pax>8 ? 'Up to 8 guests' : 'Fully booked'};
+    return {ok:true, label: key==='chefs' && t.length===1 ? t[0] : t.length+(t.length===1?' time available':' times available')};
+  }
+
+  // ------------------------------------------------ Ansicht
+  function stepHead(n, key, title, value){
+    const done = value != null && S.open!==key;
+    return `<button class="step__head" ${done?`data-open="${key}"`:'disabled'} aria-expanded="${S.open===key}">
+      <span class="step__n">0${n}</span><span class="step__t">${title}</span>
+      ${done?`<span class="step__v">${esc(value)}<span class="step__edit">Change</span></span>`:''}</button>`;
+  }
+  const stepClass = (key, value) => 'step' + ((S.open!==key && value==null)?' locked':'');
+
+  function calendar(){
+    const v=S.view, first=new Date(v.getFullYear(),v.getMonth(),1), offset=(first.getDay()+6)%7, days=new Date(v.getFullYear(),v.getMonth()+1,0).getDate();
+    const key = v.getFullYear()+'-'+v.getMonth(), st = S.monatGeladen[key];
+    const prevOk = v > new Date(today.getFullYear(),today.getMonth(),1);
+    const nextOk = new Date(v.getFullYear(),v.getMonth()+1,1) <= maxDate;
+    let cells = DOW.map(d=>`<div class="cal__dow">${d}</div>`).join('') + '<div></div>'.repeat(offset);
+    for(let i=1;i<=days;i++){
+      const d=new Date(v.getFullYear(),v.getMonth(),i), s=iso(d), ok=!!S.offen[s] && d>=today && d<=maxDate;
+      const evName = S.evTage && S.evTage[s];
+      cells += `<button class="day${S.date===s?' sel':''}${evName&&ok?' evday':''}" data-date="${s}" ${ok?'':'disabled'} aria-label="${nice(s)}${evName?' – Event: '+esc(evName):''}${ok?'':' – not available'}">${i}${evName&&ok?'<small>Event</small>':''}</button>`;
+    }
+    return `<div class="cal__nav"><button class="cal__btn" data-month="-1" ${prevOk?'':'disabled'} aria-label="Previous month">‹</button>
+      <span class="cal__m">${MONTHS[v.getMonth()]} ${v.getFullYear()}</span>
+      <button class="cal__btn" data-month="1" ${nextOk?'':'disabled'} aria-label="Next month">›</button></div>
+      <div class="cal__grid${st==='laedt'?' busy':''}">${cells}</div>
+      ${Object.entries(S.evTage||{}).filter(([d])=>d.startsWith(iso(v).slice(0,7))).map(([d,n])=>`<p class="hint" style="margin:10px 0 0"><b>${fromIso(d).getDate()} ${MONTHS[v.getMonth()]}:</b> ${esc(n)}</p>`).join('')}
+      ${st==='laedt'?'<p class="loading"><span class="spinner"></span>Loading available days …</p>':''}`;
+  }
+
+  function render(){
+    if (S.phase==='karte') return renderKarte();
+    if (S.phase==='pruefen') return renderPruefen();
+    if (S.phase==='eingebettet') return renderEingebettet();
+    if (S.phase==='warten') return renderWarten();
+    if (S.phase==='done') return renderDone();
+    const ev = evListe().length ? evAktiv() : null;
+    const room = S.room && ROOMS[S.room];
+    let h = S.err ? `<p class="err" style="margin:0 0 16px">${esc(S.err)}</p>` : '';
+    h += `<section class="${stepClass('date',S.date)}">${stepHead(1,'date','Date',S.date&&short(S.date))}`;
+    if (S.open==='date') h += `<div class="step__body">${calendar()}</div>`;
+    h += `</section><section class="${stepClass('pax',S.pax)}">${stepHead(2,'pax','Guests',S.pax&&(S.pax+(S.pax===1?' guest':' guests')))}`;
+    if (S.open==='pax') h += `<div class="step__body"><div class="pax">${[1,2,3,4,5,6,7,8].map(n=>`<button class="chip${S.pax===n?' sel':''}" data-pax="${n}">${n}</button>`).join('')}</div><p class="hint">For larger groups, please contact us directly.</p></div>`;
+    h += `</section><section class="${stepClass('room',S.room)}">${stepHead(3,'room','Room',room&&room.name)}`;
+    if (S.open==='room') h += `<div class="step__body">${evListe().map(e=>`<button class="room evcard${ev&&ev.id===e.id?' evsel':''}" data-event="${esc(e.id)}" ${evListe().length===1?'tabindex="-1" aria-disabled="true"':''}>
+        ${e.bild?`<span class="room__img"><img src="${esc(e.bild)}" alt="" loading="lazy" decoding="async"></span>`:''}
+        <span class="room__k">On this evening</span><span class="room__t">${esc(e.name)}</span>${e.beschreibung?`<span class="room__d">${esc(e.beschreibung)}</span>`:''}
+        <span class="room__s">${e.vorauszahlung?'Bookable by phone only':esc(e.zeiten.join(' · '))+(evListe().length>1?(ev&&ev.id===e.id?' · selected':' · tap to select'):'')}</span></button>`).join('')}
+      ${evListe().length?`<p class="hint" style="margin:0 0 12px">On this evening we only serve the event. Choose where you would like to sit:</p>`:''}
+      ${`<div class="rooms">${Object.entries(ROOMS).map(([k,r])=>{ const st=roomState(k); return `<button class="room${S.room===k?' sel':''}${st.wl?' wlroom':''}" data-room="${k}" ${st.ok?'':'disabled'}>
+        <picture class="room__img">${st.wl?'<span class="room__badge">Waiting list</span>':''}<source type="image/webp" srcset="${BASE}assets/img/${r.img}-800.webp"><img src="${BASE}assets/img/${r.img}-800.jpg" alt="${esc(r.alt)}" loading="lazy" decoding="async"></picture>
+        <span class="room__k">${r.kicker}</span><span class="room__t">${r.name}</span>${evListe().length?'':`<span class="room__d">${r.desc}</span>`}<span class="room__s">${esc(st.label)}</span></button>`; }).join('')}</div>`}</div>`;
+    h += `</section><section class="${stepClass('time',S.time)}">${stepHead(4,'time','Time',S.time&&(S.time+(S.warte?' · waiting list':'')))}`;
+    if (S.open==='time' && room){
+      const free = ev ? (ev.raeume[S.room] || []) : ((S.frei && S.frei[S.room]) || []);
+      const wl = ev ? [] : wlZeiten(S.room);
+      const zeiten = ev ? free : (S.testAlle ? [...new Set([...free, ...wl])].sort() : [...new Set([...room.times, ...free, ...wl])].sort());
+      h += `<div class="step__body"><div class="times">${zeiten.map(t=>{ const w = !free.includes(t) && wl.includes(t);
+          return `<button class="chip${S.time===t?' sel':''}${w?' wl':''}" data-time="${t}" ${w?'data-wl="1"':''} ${free.includes(t)||w?'':'disabled'}>${t}${w?'<small>Waiting list</small>':''}</button>`; }).join('')}</div>
+        <p class="hint">${S.testAlle?'Test: the demo restaurant has different times, so all of them are shown.':(wl.length?'Times marked “waiting list” are fully booked. We will get in touch as soon as a seat becomes available.':'Greyed-out times are already taken for '+S.pax+(S.pax===1?' guest.':' guests.'))}</p></div>`;
+    }
+    h += `</section><section class="${stepClass('contact',null)}">${stepHead(5,'contact','Your details',null)}`;
+    if (S.open==='contact') h += `<div class="step__body"><form class="form" id="f" novalidate>
+        <div class="f"><label for="vn">First name</label><input id="vn" name="vn" required autocomplete="given-name"></div>
+        <div class="f"><label for="nn">Last name</label><input id="nn" name="nn" required autocomplete="family-name"></div>
+        <div class="f"><label for="em">Email</label><input id="em" name="em" type="email" required autocomplete="email"></div>
+        <div class="f"><label for="tel">Phone</label><div class="telrow"><span class="vwbox"><span class="vwanz" id="vwanz" aria-hidden="true">🇦🇹 +43 ▾</span><select id="vw" name="vw" aria-label="Country code">${VORWAHLEN_OBEN.map(([c,n,v])=>`<option value="${c}|${v}"${c==='at'?' selected':''}>${flagge(c)} ${n} ${v}</option>`).join('')}<option disabled>──────────</option>${VORWAHLEN_ALLE.map(([c,n,v])=>`<option value="${c}|${v}">${flagge(c)} ${n} ${v}</option>`).join('')}</select></span><input id="tel" name="tel" type="tel" required autocomplete="tel-national" inputmode="tel" placeholder="660 1234567"></div></div>
+        <div class="f full"><label for="allg">Allergies, intolerances, vegetarian or pescatarian</label>
+          <button type="button" class="chip keine" id="keine" aria-pressed="false">No allergies, intolerances or preferences</button>
+          <textarea id="allg" name="allg" required placeholder="For all guests, e.g. 1× vegetarian, 1× nut allergy"></textarea></div>
+        <div class="f full"><label for="note">Occasion and requests</label><textarea id="note" name="note" placeholder="e.g. birthday, anniversary"></textarea></div>
+        <div style="position:absolute;left:-9999px" aria-hidden="true"><label for="firma">Firma</label><input id="firma" name="firma" tabindex="-1" autocomplete="off"></div>
+        <label class="check"><input type="checkbox" id="nl" name="nl"> I would like to receive the Das Schrei newsletter.</label>
+        <label class="check"><input type="checkbox" id="ag" name="ag" required> I have stated all allergies, intolerances and dietary requirements, including those of the other guests in my party. I understand that Das Schrei cannot guarantee an alternative if they are only mentioned at the restaurant.</label>
+        ${S.warte?`<p class="hint" style="grid-column:1/-1;margin:0">This time is fully booked, so you will be added to the waiting list. <b>A waiting list entry is not a reservation.</b> If a seat becomes available, we will contact you by phone or email. Only then does it become a reservation.</p>`:`<p class="hint" style="grid-column:1/-1;margin:0">In the next step you will add your credit card on Zenchef's secure page. Zenchef will also send you an email with the same link. If you have already added your card, you can ignore that email.</p>`}
+        <label class="check"><input type="checkbox" id="ds" name="ds" required><span>I have read the <a href="../impressum.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">privacy policy</a>.${S.warte?'':' In the next step I will provide a credit card as a guarantee.'}</span></label>
+        <p class="err" id="err" hidden></p>
+        <div class="f full"><button class="btn" type="submit" ${S.busy?'disabled':''}><span>${S.busy?'One moment …':(S.warte?'Join the waiting list':'Continue to credit card')}</span><i class="arrow"></i></button></div>
+      </form></div>`;
+    h += `</section>`;
+    app.innerHTML = h;
+  }
+
+  function zusammenfassung(p){
+    return `<dl class="sum"><div><dt>Date</dt><dd>${nice(p.datum)} · ${p.zeit}</dd></div><div><dt>Room</dt><dd>${esc(p.raumName || (ROOMS[p.raum]||{}).name || '')} · ${p.pax} ${p.pax==1?'guest':'guests'}</dd></div></dl>`;
+  }
+  function renderKarte(){ // nur Testumgebung: Link zeigen statt sofort weiterleiten
+    const p = store.get(); if (!p) { S.phase='form'; return render(); }
+    app.innerHTML = `<section class="done"><p class="eyebrow">Kreditkartengarantie</p><h2>Noch ein Schritt.</h2>
+      <p class="intro" style="margin-bottom:0">Reservierung in Zenchef angelegt (Nr. ${esc(p.id)}). Im Echtbetrieb geht es jetzt automatisch zur Kartenseite.</p>${zusammenfassung(p)}
+      ${p.kartenLink ? `<button class="btn" data-einbetten><span>Test A: Karte auf unserer Seite</span><i class="arrow"></i></button>
+        <a class="btn" href="${esc(p.kartenLink)}" target="_blank" rel="noopener" data-neutab><span>Test B: Karte in neuem Tab</span><i class="arrow"></i></a>
+        <a class="btn" href="${esc(p.kartenLink)}"><span>Zur Kartenseite (dieser Tab)</span><i class="arrow"></i></a>
+        <p class="hint"><a class="linkout" href="${esc(p.kartenLink)}" target="_blank" rel="noopener">In neuem Tab öffnen</a> – dann prüft diese Seite im Hintergrund weiter.</p>`
+        : `<p class="err">Kein Kartenlink von Zenchef: ${esc(p.kartenFehler||'')}</p>`}
+      <button class="btn" data-pruefen><span>Status prüfen</span><i class="arrow"></i></button></section>`;
+  }
+  // Kartenseite von Zenchef eingebettet in unserer Seite. Diese Seite prüft im Hintergrund und zeigt danach unsere Bestätigung.
+  function renderEingebettet(){
+    const p = store.get(); if (!p) { S.phase='form'; return render(); }
+    app.innerHTML = `<section class="done"><p class="eyebrow">Kreditkartengarantie</p><h2>Noch ein Schritt.</h2>
+      <p class="intro" style="margin-bottom:0">Hinterlege deine Kreditkarte, damit deine Reservierung verbindlich ist. Abgebucht wird nur bei einem Nichterscheinen oder einer späten Stornierung.</p>${zusammenfassung(p)}
+      <div class="kframe"><iframe src="${esc(p.kartenLink)}" title="Kreditkarte hinterlegen (Zenchef)" allow="payment *" referrerpolicy="origin"></iframe></div>
+      <p class="hint">${esc(S.pruefText||'Sobald deine Karte hinterlegt ist, geht es hier automatisch weiter.')}</p>
+      <p class="hint">Das Fenster bleibt leer? <a class="linkout" href="${esc(p.kartenLink)}" target="_blank" rel="noopener">Kartenseite in neuem Tab öffnen</a></p></section>`;
+  }
+  let KW = null;
+  function renderWarten(){
+    const p = store.get(); if (!p) { S.phase='form'; return render(); }
+    app.innerHTML = `<section class="done"><p class="eyebrow">Kreditkartengarantie</p><h2>Noch ein Schritt.</h2>
+      <p class="intro" style="margin-bottom:0"><span class="spinner"></span>Die sichere Kartenseite von Zenchef ist geöffnet. Sobald deine Karte hinterlegt ist, schließt sie sich und du bist wieder hier.</p>${zusammenfassung(p)}
+      <button class="btn" data-wieder><span>Kartenseite wieder öffnen</span><i class="arrow"></i></button>
+      ${S.pruefText?`<p class="hint">${esc(S.pruefText)}</p>`:''}</section>`;
+  }
+  function renderPruefen(){
+    const p = store.get(); if (!p) { S.phase='form'; return render(); }
+    app.innerHTML = `<section class="done"><p class="eyebrow">Credit card guarantee</p><h2>Checking your card.</h2>
+      <p class="intro" style="margin-bottom:0"><span class="spinner"></span>${esc(S.pruefText||'One moment, your confirmation is on its way.')}</p>${zusammenfassung(p)}
+      ${p.kartenLink?`<p class="hint">Card not provided yet? <a class="linkout" href="${esc(p.kartenLink)}">Go to the card page</a></p>`:''}</section>`;
+  }
+  function renderDone(){
+    const p = S.fertig || {};
+    if (p.warteliste) { app.innerHTML = `<section class="done"><p class="eyebrow">Waiting list</p><h2>You are on the waiting list${p.vorname?', '+esc(p.vorname):''}.</h2>
+      <p class="intro" style="margin-bottom:0"><b>This is not a reservation yet.</b> If a seat becomes available, we will contact you by phone or email. Only then is your table reserved.</p>${p.datum?zusammenfassung(p):''}<a class="btn" href="index.html"><span>Back to home</span><i class="arrow"></i></a></section>`; return; }
+    app.innerHTML = `<section class="done"><p class="eyebrow">Reservation confirmed</p><h2>Thank you${p.vorname?', '+esc(p.vorname):''}.</h2>
+      <p class="intro" style="margin-bottom:0">Your card has been registered and your reservation is confirmed. The confirmation is on its way to ${esc(p.email||'your email address')}.</p>
+      ${p.datum?zusammenfassung(p):''}<a class="btn" href="index.html"><span>Back to home</span><i class="arrow"></i></a></section>`;
+  }
+
+  // ------------------------------------------------ Karte prüfen und bestätigen
+  let pollTimer = null;
+  async function pruefen(einmal, phase){
+    const p = store.get(); if (!p) return;
+    S.phase = phase || 'pruefen'; render();
+    clearTimeout(pollTimer);
+    const ende = Date.now() + 10*60e3;
+    const tick = async () => {
+      try {
+        const st = await api('status', { id:p.id, sig:p.sig });
+        if (st.bestaetigt || st.karte) {
+          if (KW) try { KW.close(); } catch(x) {}
+          S.fertig = p; store.set(null); S.phase='done'; render(); window.focus(); window.scrollTo({top:0}); return;
+        }
+        S.pruefText = 'Your card has not been provided yet. This page updates automatically.';
+      } catch(e){ S.pruefText = 'The check did not work just now. We will keep trying. (' + e.message + ')'; }
+      if (S.phase==='pruefen') render();
+      if (!einmal && Date.now() < ende && (S.phase==='pruefen' || S.phase==='eingebettet' || S.phase==='warten')) pollTimer = setTimeout(tick, 4000);
+    };
+    tick();
+  }
+
+  // ------------------------------------------------ Bedienung
+  const order = ['date','pax','room','time','contact'];
+  function next(from){ S.open = order[order.indexOf(from)+1]; if (S.open==='room') ladeFrei(); render(); }
+
+  app.addEventListener('click', e => {
+    const t = e.target.closest('button'); if (!t || t.disabled) return;
+    if (t.dataset.month){ S.view = new Date(S.view.getFullYear(), S.view.getMonth()+Number(t.dataset.month), 1); render(); ladeMonat(); return; }
+    if (t.dataset.date){ if (S.date!==t.dataset.date){ S.date=t.dataset.date; S.room=null; S.time=null; S.warte=false; S.frei=null; S.freiKey=''; } S.err=''; S.pax ? (S.open='room', ladeFrei(), render()) : next('date'); return; }
+    if (t.dataset.pax){ const p=Number(t.dataset.pax); if (S.pax!==p){ S.pax=p; S.room=null; S.time=null; S.warte=false; } S.err=''; next('pax'); return; }
+    if (t.dataset.event){ if (evListe().length<2) return; if (S.evId!==t.dataset.event){ S.evId=t.dataset.event; S.room=null; S.time=null; } render(); return; }
+    if (t.dataset.room){ if (S.room!==t.dataset.room){ S.room=t.dataset.room; S.time=null; S.warte=false; }
+      const evx = evListe().length ? evAktiv() : null;
+      if (evx){ S.evId=evx.id; const z=evx.raeume[S.room]||[]; if (z.length===1){ S.time=z[0]; S.open='contact'; render(); return; } next('room'); return; }
+      if (S.room==='chefs' && S.frei){ const z = S.frei.chefs.length ? S.frei.chefs : wlZeiten('chefs');
+        if (z.length===1){ S.time=z[0]; S.warte=!S.frei.chefs.length; S.open='contact'; render(); return; } }
+      next('room'); return; }
+    if (t.dataset.time){ S.time=t.dataset.time; S.warte=t.dataset.wl==='1'; next('time'); return; }
+    if (t.dataset.open){ S.open=t.dataset.open; if (S.open==='room') ladeFrei(); render(); return; }
+    if ('pruefen' in t.dataset){ pruefen(false); return; }
+    if ('wieder' in t.dataset){ const p=store.get(); if (p && p.kartenLink) { try { KW = window.open(p.kartenLink, 'schrei_karte'); } catch(x) {} if (!KW) location.href = p.kartenLink; } return; }
+    if ('einbetten' in t.dataset){ pruefen(false, 'eingebettet'); window.scrollTo({top:0, behavior:'smooth'}); return; }
+  });
+
+  app.addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = e.target, err = f.querySelector('#err');
+    f.querySelectorAll('input').forEach(i=>i.classList.add('touched'));
+    if (!f.checkValidity()){ err.textContent = !keineAktiv() && !f.allg.value.trim() ? 'Please state allergies and dietary requirements for all guests or tap “No allergies, intolerances or preferences”.' : !f.ag.checked ? 'Please confirm that you have stated all allergies of your party.' : !f.ds.checked ? 'Please accept the privacy policy.' : 'Please fill in your name, a valid email and your phone number.'; err.hidden=false; return; }
+    const daten = { datum:S.date, zeit:S.time, pax:S.pax, raum:S.room, event: (evListe().length && evAktiv()) ? evAktiv().id : null, warteliste:!!S.warte, vorname:f.vn.value.trim(), nachname:f.nn.value.trim(), email:f.em.value.trim(), telefon: telefonNr(f), land: f.vw.value.split('|')[0],
+      allergien: keineAktiv() ? 'keine' : f.allg.value.trim(), allergienBestaetigt:f.ag.checked, notiz:f.note.value.trim(), newsletter:f.nl.checked, firma:f.firma.value, dauer: Date.now()-S.start, lang: LANG, seite: CFG.SEITE };
+    const werte = { vn:f.vn.value, nn:f.nn.value, em:f.em.value, tel:f.tel.value, vw:f.vw.value, note:f.note.value, allg:f.allg.value, keine:keineAktiv(), ag:f.ag.checked, nl:f.nl.checked, ds:f.ds.checked };
+    // Kartenfenster sofort öffnen – nur direkt im Klick erlaubt der Browser das. Den Link setzen wir, sobald er da ist.
+    let win = null;
+    if (false) try { win = window.open('', 'schrei_karte'); if (win) win.document.write('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Das Schrei</title><body style="margin:0;display:grid;place-items:center;height:100vh;background:#f4f1ea;color:#151512;font:16px system-ui,sans-serif"><p>Einen Moment, die Kartenseite wird geöffnet …</p></body>'); } catch(x) { win = null; }
+    S.busy = true; render(); restore(werte);
+    try {
+      const j = await api('anlegen', daten);
+      const p = { id:j.id, sig:j.sig, kartenLink:j.kartenLink, kartenFehler:j.kartenFehler, datum:S.date, zeit:S.time, pax:S.pax, raum:S.room, raumName: ROOMS[S.room].name + ((evListe().length && evAktiv()) ? ' · ' + evAktiv().name : ''), vorname:daten.vorname, email:daten.email };
+      store.set(p);
+      S.busy=false;
+      if (j.kartenLink) {
+        if (win && !win.closed) { KW = win; win.location.href = j.kartenLink; pruefen(false, 'warten'); window.scrollTo({top:0}); return; }
+        location.href = j.kartenLink; return;                     // Fenster blockiert → Kartenseite im selben Tab
+      }
+      if (win) try { win.close(); } catch(x) {}
+      if (j.warteliste) { S.fertig = Object.assign({ warteliste:true }, p); store.set(null); S.phase='done'; render(); window.scrollTo({top:0}); return; }
+      if (TEST) { S.phase='karte'; render(); return; }
+      throw new Error('The card page could not be opened. Please call us and we will help you right away.');
+    } catch(ex){
+      if (win) try { win.close(); } catch(x) {}
+      S.busy=false; render(); restore(werte);
+      const e2 = document.getElementById('err'); e2.textContent = ex.message; e2.hidden=false;
+      if (/taken/.test(ex.message)) { S.frei=null; S.freiKey=''; }
+    }
+  });
+  const keineAktiv = () => { const k=document.getElementById('keine'); return !!(k && k.getAttribute('aria-pressed')==='true'); };
+  function setKeine(an){
+    const k=document.getElementById('keine'), a=document.getElementById('allg'); if(!k||!a) return;
+    k.setAttribute('aria-pressed', an?'true':'false'); k.classList.toggle('sel', !!an);
+    a.hidden = !!an; a.required = !an; if (an) a.value='';
+  }
+  // Test B: neuer Tab öffnet sich über den Link, diese Seite wartet und prüft
+  app.addEventListener('click', e => { if (e.target.closest('[data-neutab]')) setTimeout(() => pruefen(false), 300); });
+  app.addEventListener('click', e => { const k=e.target.closest('#keine'); if (k) setKeine(!keineAktiv()); });
+  // Vorwahl + Nummer → +43 6601944925 (führende 0 und Leerzeichen weg; wer selbst +.. eingibt, behält seine Vorwahl)
+  function vwAnzeige(){ const v=document.getElementById('vw'), a=document.getElementById('vwanz'); if(!v||!a) return; const [c,n]=v.value.split('|'); a.textContent = flagge(c)+' '+n+' ▾'; }
+  app.addEventListener('change', e => { if (e.target.id==='vw') vwAnzeige(); });
+  function telefonNr(f){
+    const roh = f.tel.value.trim();
+    if (/^(\+|00)/.test(roh)) return '+' + roh.replace(/^00/, '').replace(/[^\d]/g, '');
+    return f.vw.value.split('|')[1] + ' ' + roh.replace(/[^\d]/g, '').replace(/^0+/, '');
+  }
+  function restore(w){ const f=document.getElementById('f'); if(!f) return; f.vn.value=w.vn; f.nn.value=w.nn; f.em.value=w.em; f.tel.value=w.tel; f.vw.value=w.vw; vwAnzeige(); f.note.value=w.note; f.allg.value=w.allg; setKeine(w.keine); f.ag.checked=w.ag; f.nl.checked=w.nl; f.ds.checked=w.ds; }
+
+  // ------------------------------------------------ Testpanel
+  document.getElementById('t-info').onclick = () => api('info').catch(e=>log('Fehler', {error:e.message}));
+  document.getElementById('t-diag').onclick = () => api('diagnose', { datum: S.date || iso(today) }).catch(e=>log('Fehler', {error:e.message}));
+  document.getElementById('t-force').onclick = async () => { const p=store.get(); if(!p) return; try { await api('bestaetigen', { id:p.id, sig:p.sig, erzwingen:true }); S.fertig=p; store.set(null); S.phase='done'; render(); } catch(e){ log('Fehler', {error:e.message}); } };
+  document.getElementById('t-auf').onclick = () => api('aufraeumen').catch(e=>log('Fehler', {error:e.message}));
+  document.getElementById('t-clear').onclick = () => { store.set(null); try { sessionStorage.removeItem('schrei_anlegen_log'); } catch(e){} location.hash=''; location.reload(); };
+
+  // ------------------------------------------------ Start
+  const hashDatum = (location.hash || '').replace('#','');
+  if (/^\d{4}-\d{2}-\d{2}$/.test(hashDatum) && fromIso(hashDatum) >= today) { S.date = hashDatum; S.view = new Date(fromIso(hashDatum).getFullYear(), fromIso(hashDatum).getMonth(), 1); S.open = 'pax'; }
+  render();
+  api('info').catch(()=>{});
+  if (store.get()) pruefen(false);          // zurück von der Kartenseite (oder Seite neu geladen)
+  else ladeMonat();
+})();
+</script>
+</body>
+</html>

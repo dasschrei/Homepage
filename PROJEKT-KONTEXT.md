@@ -82,6 +82,8 @@ Sie liegt im Projektordner; beim Netlify-Deploy kann sie mitgehen oder weggelass
 
 ## 5. Reservierung (Zenchef, rid 368147)
 
+**Umsetzung (Stand web-v22, ins Repo übernommen am 13.11.2026):** eigene Seiten `reservieren.html` / `en/reserve.html`, alle „Reservieren“-Buttons zeigen darauf. Server ist die Supabase Edge Function `web-reservierung` (Code in `supabase/functions/web-reservierung/index.ts`, Deploy in Supabase, nicht über Netlify). Details, Secrets und offene Punkte: `supabase/UEBERGABE-RESERVIERUNG.md`. `/supabase/*` ist auf der Live-Seite gesperrt.
+
 Eigene Reservierungsseite über die Zenchef-API (Konzept Okt 2026 – erst Testumgebung, dann live):
 - Komplett raumbasiert: **Datum → Personen → Raum → Uhrzeit**.
 - **Chef's Table** (L-Theke, 10 Plätze): nur **19:00**. **Restaurant** (10 Tische): **18:00, 18:30, 19:30**.

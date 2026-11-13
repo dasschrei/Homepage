@@ -71,7 +71,7 @@ a{color:inherit;text-decoration:none}
       <span class="txt"><span class="t">Website</span><span class="s">das-schrei.at</span></span>
       <i class="arrow" aria-hidden="true"></i>
     </a>
-    <a class="row" id="link-reservieren" href="https://bookings.zenchef.com/results?rid=368147&amp;pid=1001">
+    <a class="row" id="link-reservieren" href="reservieren.html">
       <span class="thumb"><img src="assets/img/gastraum-raum-800.jpg" alt="" loading="eager"></span>
       <span class="txt"><span class="t">Tisch reservieren</span><span class="s">Gastraum &amp; Chef’s Table</span></span>
       <i class="arrow" aria-hidden="true"></i>
@@ -94,7 +94,7 @@ a{color:inherit;text-decoration:none}
   </footer>
 </main>
 
-<script src="assets/site.js?v=20261016"></script>
+<script src="assets/site.js?v=20261028"></script>
 <script>
 (() => {
   const D = window.SCHREI_DATEN;
@@ -115,7 +115,7 @@ a{color:inherit;text-decoration:none}
   const box = document.querySelector('#events .events');
   list.forEach(e => {
     const a = el('a', 'event');
-    a.href = e.link || D.RESERVIEREN;
+    a.href = D.RESERVIEREN + '#' + e.tag.getFullYear() + '-' + String(e.tag.getMonth() + 1).padStart(2, '0') + '-' + String(e.tag.getDate()).padStart(2, '0');
     if (e.bild) {
       const m = el('div', 'event__img'); const img = document.createElement('img');
       img.src = e.bild; img.alt = ''; img.loading = 'lazy'; m.appendChild(img); a.appendChild(m);
