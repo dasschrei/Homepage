@@ -24,7 +24,13 @@ const U: Umg = Deno.env.get('WEB_RES_UMGEBUNG') === 'live' ? 'live' : 'test';
 const TEST = U === 'test';
 // WEB_RES_DEBUG = '1' → Testpanel-Infos auch im Echtbetrieb (für einen kontrollierten Echttest). Danach wieder löschen.
 const DEBUG = TEST || Deno.env.get('WEB_RES_DEBUG') === '1';
-const VERSION = 'web-v22';
+const VERSION = 'web-v23';
+// Versuch (13.11.2026): Reservierung als "waiting_customer" statt "confirmed" anlegen, um die zusätzliche Zenchef-Mail
+// „Antrag auf Kreditkartengarantie“ zu vermeiden. Greift nur mit Secret WEB_RES_ANLEGE_STATUS = waiting_customer
+// UND im Testmodus (Demo 353058 oder WEB_RES_DEBUG = 1 für einen kontrollierten Echttest). Ohne Debug wird immer "confirmed" angelegt.
+// Nach der Karte setzt die Funktion die Reservierung selbst auf "confirmed" und löst dabei die Zenchef-Bestätigungsmail aus
+// (beim Status-Abruf der Seite und beim Aufräumen).
+const ANLEGE_STATUS = DEBUG && Deno.env.get('WEB_RES_ANLEGE_STATUS') === 'waiting_customer' ? 'waiting_customer' : 'confirmed';
 // Warteliste vorerst AUS: Ein Test hat statt eines Wartelisten-Eintrags eine bestätigte Reservierung ohne Tisch erzeugt (Überbuchung).
 // Erst wieder einschalten, wenn Zenchef den richtigen Aufruf für die Warteliste genannt hat.
 // Wieder AN (27.10.): ohne Kreditkarte, ohne force, mit Sicherheitsprüfung – siehe anlegen().
@@ -264,7 +270,7 @@ async function anlegen(b: any, origin: string) {
   const notiz = String(b.notiz || '').trim().slice(0, 500);
   const kommentar = ['Allergien/Ernährung: ' + allergien, notiz, MARKE + (aufWarteliste ? ' WARTELISTE' : '') + ' ' + (ev ? 'Event: ' + ev.name + ' · ' : '') + RAEUME[raum].name + (b.newsletter ? ' · Newsletter: ja' : '') + ' · Allergie-Hinweis bestätigt'].filter(Boolean).join('\n\n');
   const body = { day: datum, time: zeit, nb_guests: pax, firstname: vorname, lastname: nachname, phone_number: telefon, email,
-    comment: kommentar, country: /^[a-z]{2}$/.test(String(b.land || '')) ? String(b.land) : 'at', lang: b.lang === 'en' ? 'en' : 'de', status: aufWarteliste ? 'waiting' : 'confirmed', reservation_type: 'reservation',
+    comment: kommentar, country: /^[a-z]{2}$/.test(String(b.land || '')) ? String(b.land) : 'at', lang: b.lang === 'en' ? 'en' : 'de', status: aufWarteliste ? 'waiting' : ANLEGE_STATUS, reservation_type: 'reservation',
     ...(ev ? { offers: [{ offer_id: Number(ev.id), count: pax }] } : {}) };
   // Ohne with-confirmation → Zenchef schickt jetzt noch KEINE Mail. Die Bestätigung kommt erst nach der Karte.
   let j: any = null;
@@ -331,7 +337,7 @@ async function anlegen(b: any, origin: string) {
     catch (e) { versuche.push({ weg: m + ' ' + (v2 ? 'v2' : 'v1') + ' ' + p, fehler: String((e as any)?.message || e).slice(0, 160) }); }
   }
   if (!url) { try { const j2 = await zc('/bookings/' + id); url = linkIn((j2 && j2.data) || j2); if (url) versuche.push({ weg: 'Reservierung neu geladen', ok: true }); } catch { /* weiter */ } }
-  const out: any = { ok: true, id, sig: await sig(id), kartenLink: url, warteliste: aufWarteliste, zcStatus: bk.status || '' };
+  const out: any = { ok: true, id, sig: await sig(id), kartenLink: url, warteliste: aufWarteliste, zcStatus: bk.status || '', anlegeStatus: ANLEGE_STATUS };
   if (!url) out.kartenFehler = 'Kein Kartenlink erhalten';
   if (DEBUG && aufWarteliste) out.wartelisteVersuche = wlVersuche;
   if (DEBUG) out.raum = { gesendet: rid || null, fehler: raumFehler || null, antwort: Object.fromEntries(Object.entries(bk).filter(([k]) => /room|table/i.test(k))) };
@@ -358,7 +364,8 @@ function knapp(bk: any) {
 }
 function karteFertig(bk: any) {
   const f = knapp(bk); const s = JSON.stringify(f).toLowerCase();
-  if (/waiting_imprint|waiting_customer|pending/.test(String(bk.status || '').toLowerCase())) return false;
+  // waiting_customer zählt hier nicht als „offen“: beim Versuch mit ANLEGE_STATUS steht die Reservierung bis zur Bestätigung so da – entscheidend ist dann die Karte.
+  if (/waiting_imprint|pending/.test(String(bk.status || '').toLowerCase())) return false;
   if (/(succeeded|success|captured|authori[sz]ed|imprinted|paid|completed|"done")/.test(s) || f.has_imprint === true || f.is_charged === true) return true;
   // Vor der Karte ist "charge" null. Danach ein Objekt – gilt als hinterlegt, solange sein Status nicht offen/fehlgeschlagen ist.
   const c = bk.charge;
@@ -370,9 +377,16 @@ async function statusAbfrage(b: any) {
   const id = String(b.id || ''); await pruefeSig(id, String(b.sig || ''));
   const j = await zc('/bookings/' + id); const bk = (j && j.data) || j || {};
   const out: any = { id, zcStatus: bk.status || '', karte: karteFertig(bk), bestaetigt: String(bk.comment || '').includes('[WEB-BESTÄTIGT]') };
+  // Versuch waiting_customer: Karte da, aber noch nicht bestätigt → jetzt bestätigen (löst die Zenchef-Bestätigungsmail aus).
+  if (bk.status === 'waiting_customer' && out.karte && istWebReservierung(bk)) {
+    try { const r = await bestaetigen({ id, sig: b.sig }); out.bestaetigt = true; out.zcStatus = 'confirmed'; if (DEBUG) out.bestaetigung = r; }
+    catch (e) { if (DEBUG) out.bestaetigungFehler = String((e as any)?.message || e).slice(0, 200); }
+  }
   if (DEBUG) out.test = knapp(bk);
   return out;
 }
+
+const istWebReservierung = (bk: any) => { const k = String(bk.comment || ''); return k.includes(MARKE) && !k.includes('WARTELISTE'); };
 
 // Bestätigungsmail von Zenchef auslösen (einmalig). Läuft nur, wenn die Karte hinterlegt ist – in der Testumgebung auch erzwingbar.
 async function bestaetigen(b: any) {
@@ -407,19 +421,29 @@ const zcZeit = (x: any) => { const t = Date.parse(String(x || '').replace(' ', '
 async function aufraeumen(probe: boolean) {
   const heute = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
   const q = '/bookings?filters[0][field]=comment&filters[0][operator]=LIKE&filters[0][value]=' + encodeURIComponent('%[WEB]%')
-    + '&filters[1][field]=day&filters[1][operator]=>=&filters[1][value]=' + heute + '&filters[2][field]=status&filters[2][operator]==&filters[2][value]=confirmed&limit=100&page=1&sort[field]=created_at&sort[order]=desc';
-  const j = await zc(q); const liste: any[] = (j && j.data) || [];
+    + '&filters[1][field]=day&filters[1][operator]=>=&filters[1][value]=' + heute + '&limit=100&page=1&sort[field]=created_at&sort[order]=desc';
+  const j = await zc(q); const liste: any[] = ((j && j.data) || []).filter((x: any) => x.status === 'confirmed' || x.status === 'waiting_customer');
   const jetzt = Date.now(), ergebnis: any[] = [];
   for (const bk0 of liste) {
     const kommentar = String(bk0.comment || '');
     if (!kommentar.includes('[WEB]') || kommentar.includes('WARTELISTE')) continue;
     if (/ohne\s*karte/i.test(kommentar)) continue;                                  // vom Team freigegeben (z. B. Stammgast)
     const alter = (jetzt - zcZeit(bk0.created_at)) / 60e3;
+    // Versuch waiting_customer: Karte schon da → sofort bestätigen (nicht erst nach Ablauf der Frist)
+    if (bk0.status === 'waiting_customer' && alter < 48 * 60) {
+      let bkw = bk0; try { const g = await zc('/bookings/' + bk0.id); bkw = (g && g.data) || g || bk0; } catch { /* Liste reicht */ }
+      if (bkw.status === 'waiting_customer' && karteFertig(bkw)) {
+        const e: any = { id: bkw.id, name: [bkw.firstname, bkw.lastname].join(' ').trim(), tag: bkw.day, zeit: hhmm(bkw.time), pax: bkw.nb_guests, alterMin: Math.round(alter), status: bkw.status };
+        if (probe) e.aktion = 'Karte da – würde bestätigt';
+        else { try { await bestaetigen({ id: String(bkw.id), sig: await sig(String(bkw.id)) }); e.aktion = 'Karte da – bestätigt'; } catch (x) { e.aktion = 'Bestätigen fehlgeschlagen: ' + String((x as any)?.message || x).slice(0, 120); } }
+        ergebnis.push(e); continue;
+      }
+    }
     if (!(alter >= AUFRAEUMEN_MIN && alter < 48 * 60)) continue;                     // nur frische Web-Buchungen nach Ablauf der Frist
     // Detail frisch laden – Karte könnte gerade eben hinterlegt worden sein
     let bk = bk0; try { const g = await zc('/bookings/' + bk0.id); bk = (g && g.data) || g || bk0; } catch { /* Liste reicht */ }
     const eintrag: any = { id: bk.id, name: [bk.firstname, bk.lastname].join(' ').trim(), tag: bk.day, zeit: hhmm(bk.time), pax: bk.nb_guests, alterMin: Math.round(alter), status: bk.status, charge: bk.charge ?? null };
-    if (bk.status !== 'confirmed' || karteFertig(bk)) { eintrag.aktion = 'Karte da – bleibt'; ergebnis.push(eintrag); continue; }
+    if ((bk.status !== 'confirmed' && bk.status !== 'waiting_customer') || karteFertig(bk)) { eintrag.aktion = 'Karte da – bleibt'; ergebnis.push(eintrag); continue; }
     if (probe || !AUFRAEUMEN_AN) { eintrag.aktion = 'würde storniert'; ergebnis.push(eintrag); continue; }
     // Stornieren. Eigene Mail mit Begründung, wenn das Schrei-Postfach eingerichtet ist – sonst die Zenchef-Stornomail.
     const eigeneMail = !!(MAIL_PASS && bk.email);
@@ -457,7 +481,7 @@ Deno.serve(async (req: Request) => {
   try {
     const b = await req.json().catch(() => ({}));
     const a = String(b.action || '');
-    if (a === 'info') return json({ version: VERSION, umgebung: U, debug: DEBUG });
+    if (a === 'info') return json({ version: VERSION, umgebung: U, debug: DEBUG, anlegeStatus: ANLEGE_STATUS });
     if (a === 'monat') { limit('m:' + ip, 120, 60); if (!istDatum(b.von) || !istDatum(b.bis)) throw new Fehler('Zeitraum fehlt'); return json({ umgebung: U, debug: DEBUG, ...(await monat(b.von, b.bis)) }); }
     if (a === 'frei') { limit('f:' + ip, 240, 60); const pax = Number(b.pax); if (!istDatum(b.datum) || !(pax >= 1 && pax <= 10)) throw new Fehler('Datum oder Personen fehlen'); return json({ umgebung: U, debug: DEBUG, ...(await frei(b.datum, pax)) }); }
     if (a === 'anlegen') { limit('a:' + ip, TEST ? 30 : 5, 60); return json({ umgebung: U, debug: DEBUG, ...(await anlegen(b, origin)) }); }
