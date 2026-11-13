@@ -42,3 +42,10 @@ Bitte zusätzlich einmal **ohne** Karte buchen und die Seite schließen. In Zenc
 - Alle Testreservierungen in Zenchef stornieren.
 - Secrets zurücksetzen: `WEB_RES_UMGEBUNG = live` wieder anlegen (bei Variante A), `WEB_RES_ANLEGE_STATUS` löschen, wenn der Versuch scheitert, `WEB_RES_DEBUG` vor dem Livegang löschen.
 - Ergebnis (Punkte 1–6) kurz an Claude im Projekt schicken. Klappt alles, schalte ich den Versuch auch für den Echtbetrieb frei.
+
+---
+
+## Ergebnis (13.11.2026, Echttest)
+
+**Gescheitert.** Mit `waiting_customer` öffnet sich keine Kreditkartenseite, nur die Warteseite. Zenchef erzeugt bei diesem Status keinen Kartenlink. Secret `WEB_RES_ANLEGE_STATUS` wurde wieder entfernt, damit wieder `confirmed` angelegt wird.
+Stattdessen steht jetzt auf der Reservierungsseite (DE + EN) vor „Weiter zur Kreditkarte“ ein Hinweis, dass Zenchef zusätzlich eine Mail mit demselben Link schickt. Die Anfrage an den Zenchef-Support bleibt offen.
