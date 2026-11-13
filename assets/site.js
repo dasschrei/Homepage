@@ -69,7 +69,7 @@ window.addEventListener('load', () => {
   // am Tag nach dem (letzten) Termin verschwindet die Karte von selbst. Kein Event: leere Liste [].
   // datum: ein Tag 'JJJJ-MM-TT' oder mehrere als Liste ['…', '…'] (dann eine Karte mit allen Terminen).
   // preisinfo (optional): kleiner Zusatz unter dem Preis, z. B. { de: 'inkl. …', en: 'incl. …' }.
-  // link: Zenchef-Experience-Link. Leer lassen (''), solange es ihn noch nicht gibt – dann führt der Button zur normalen Reservierung.
+  // link: wird nicht mehr gebraucht – der Button führt auf die eigene Reservierungsseite mit vorgewähltem Datum.
   const EVENTS = [
     { datum: ['2026-12-05', '2026-12-12', '2026-12-19'],
       titel: { de: 'Advent-Samstage', en: 'Advent Saturdays' },
@@ -83,7 +83,7 @@ window.addEventListener('load', () => {
       preis: '€ 250', preisinfo: { de: 'inkl. Aperitif, Weinbegleitung und Menü', en: 'incl. aperitif, wine pairing and menu' },
       bild: 'assets/img/event-tement.jpg', link: 'https://bookings.zenchef.com/results?rid=368147&pid=1001&shxpid=139490' },
   ];
-  const RESERVIEREN = 'https://bookings.zenchef.com/results?rid=368147&pid=1001';
+  const RESERVIEREN = '/reservieren.html';   // eigene Reservierungsseite (EN: /en/reserve.html)
   const GUTSCHEINE = 'https://shop.zenchef.com/?active-collection=vouchers&collections=vouchers&shop-id=sh_fa45842d-b087-4dc6-b5e8-7543da231ad8&language=de&primary-color=cccccc';
   // Dieselben Daten für die Link-Seite (links.html) – so ist sie immer automatisch aktuell.
   window.SCHREI_DATEN = { EVENTS, RESERVIEREN, GUTSCHEINE, termine: (tage, en) => termine(tage, en) };
@@ -224,8 +224,10 @@ function start() {
     const list = (EVENTS || []).filter(e => e && e.datum && pick(e.titel))
       .map(e => {
         const tage = [].concat(e.datum).map(d).filter(t => t >= today).sort((a, b) => a - b);
-        const l = e.link || RESERVIEREN;
-        return { ...e, tage, tag: tage[0], link: en && !/[?&]lang=/.test(l) ? l + (l.includes('?') ? '&' : '?') + 'lang=en' : l };
+        // Button führt auf die eigene Reservierungsseite, das Datum ist vorgewählt (Experience erkennt die Seite selbst aus Zenchef)
+        const t0 = tage[0];
+        const l = t0 ? (en ? '/en/reserve.html' : '/reservieren.html') + '#' + t0.getFullYear() + '-' + String(t0.getMonth() + 1).padStart(2, '0') + '-' + String(t0.getDate()).padStart(2, '0') : RESERVIEREN;
+        return { ...e, tage, tag: tage[0], link: l };
       }).filter(e => e.tag).sort((a, b) => a.tag - b.tag);
     const sec = $('#events');
     if (!list.length) {
@@ -251,7 +253,7 @@ function start() {
           ${pick(e.text) ? `<p class="event__text">${esc(pick(e.text))}</p>` : ''}
           <div class="event__foot">
             ${e.preis ? `<span class="event__price">${esc(e.preis)}${en ? ' per person' : ' pro Person'}${pick(e.preisinfo) ? `<small style="display:block;font-size:13px;opacity:.8;margin-top:2px">${esc(pick(e.preisinfo))}</small>` : ''}</span>` : ''}
-            ${e.link ? `<a class="btn btn--dark" data-magnetic href="${esc(e.link)}" target="_blank" rel="noopener"><span>${en ? 'Reserve a seat' : 'Platz sichern'}</span><i class="arrow"></i></a>` : ''}
+            ${e.link ? `<a class="btn btn--dark" data-magnetic href="${esc(e.link)}"><span>${en ? 'Reserve a seat' : 'Platz sichern'}</span><i class="arrow"></i></a>` : ''}
           </div>
         </div>
       </article>`).join('');
@@ -278,7 +280,7 @@ function start() {
       image: e.bild ? [/^https?:/.test(e.bild) ? e.bild : SITE + e.bild.replace(/^\//, '')] : undefined,
       location: { '@type': 'Place', name: 'Das Schrei', address: { '@type': 'PostalAddress', streetAddress: 'Josef-von-Eichendorff-Straße 5', postalCode: '5020', addressLocality: 'Salzburg', addressCountry: 'AT' } },
       organizer: { '@type': 'Restaurant', name: 'Das Schrei', url: SITE },
-      offers: e.link ? { '@type': 'Offer', url: e.link, availability: 'https://schema.org/InStock', ...(parseFloat(String(e.preis || '').replace(/[^\d,.]/g, '').replace(',', '.')) ? { price: parseFloat(String(e.preis).replace(/[^\d,.]/g, '').replace(',', '.')), priceCurrency: 'EUR' } : {}) } : undefined,
+      offers: e.link ? { '@type': 'Offer', url: 'https://www.das-schrei.at' + e.link, availability: 'https://schema.org/InStock', ...(parseFloat(String(e.preis || '').replace(/[^\d,.]/g, '').replace(',', '.')) ? { price: parseFloat(String(e.preis).replace(/[^\d,.]/g, '').replace(',', '.')), priceCurrency: 'EUR' } : {}) } : undefined,
     })));
     document.head.appendChild(ld);
   }
