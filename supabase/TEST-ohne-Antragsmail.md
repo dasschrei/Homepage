@@ -20,7 +20,7 @@ Ohne Testmodus legt die Funktion immer `confirmed` an, also genau wie web-v22.
    - **A. Demo-Restaurant 353058 (zuerst):** `WEB_RES_UMGEBUNG` vorübergehend löschen. Die Live-Homepage ist davon nicht betroffen, weil sie noch direkt auf Zenchef verlinkt. Funktioniert aber nur, wenn im Demo-Restaurant ein Zahlungsanbieter für Testkarten aktiv ist (das war noch offen).
    - **B. Kontrollierter Echttest:** `WEB_RES_UMGEBUNG = live` lassen und `WEB_RES_DEBUG = 1` setzen. Mit deiner eigenen Karte und E-Mail-Adresse buchen und die Buchung danach stornieren.
 4. Die Reservierungsseite der Vorschau öffnen: https://deploy-preview-1--dasschrei.netlify.app/reservieren.html
-   Im Testpanel ganz unten auf den Info-Button klicken: Dort muss `web-v23` und `anlegeStatus: waiting_customer` stehen.
+   Im Testpanel ganz unten auf „Verbindung prüfen“ klicken: Dort muss `web-v23` und `anlegeStatus: waiting_customer` stehen.
 
 ## 2. Testen und worauf du achten musst
 
