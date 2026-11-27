@@ -527,10 +527,10 @@ function start() {
     const get = t => (parts.find(p => p.type === t) || {}).value;
     const day = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[get('weekday')];
     const m = (+get('hour') % 24) * 60 + (+get('minute'));
-    const eve = [1080, 1320];
+    const eve = [1080, 1380];
     const heute = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Vienna' }).format(new Date());
     const sonder = iso => sonderTage().filter(x => x.kommend.includes(iso)).map(x => [hm(x.von), hm(x.bis || '22:00')]);
-    const slots = [...(({ 1: [eve], 2: [eve], 3: [eve], 4: [eve], 5: [[720, 840], eve] })[day] || []), ...sonder(heute)];
+    const slots = [...(({ 1: [eve], 2: [eve], 3: [eve], 4: [eve], 5: [eve] })[day] || []), ...sonder(heute)];
     const fmt = v => String(Math.floor(v / 60)).padStart(2, '0') + ':' + String(v % 60).padStart(2, '0');
     const open = slots.find(([a, b]) => m >= a && m < b);
     const next = slots.find(([a]) => m < a);
@@ -545,7 +545,7 @@ function start() {
         const d = new Date(today + 'T12:00:00Z');
         d.setUTCDate(d.getUTCDate() + i);
         const iso = d.toISOString().slice(0, 10);
-        const first = ((({ 1: [eve], 2: [eve], 3: [eve], 4: [eve], 5: [[720, 840], eve] })[d.getUTCDay()] || []).concat(sonder(iso)))[0];
+        const first = ((({ 1: [eve], 2: [eve], 3: [eve], 4: [eve], 5: [eve] })[d.getUTCDay()] || []).concat(sonder(iso)))[0];
         if (!first || holiday(iso)) continue;
         const name = i === 1 ? (en ? 'tomorrow' : 'morgen') : d.toLocaleDateString(en ? 'en-GB' : 'de-AT', { weekday: 'long', timeZone: 'UTC' });
         txt.textContent = en ? `Currently closed · open ${name} from ${fmt(first[0])}` : `Zurzeit geschlossen · geöffnet ${name} ab ${fmt(first[0])}`;
